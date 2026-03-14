@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-shell">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <div class="dashboard-section-title">История уроков</div>
+            <div class="dashboard-section-subtitle">Завершенные занятия</div>
+        </div>
+        <a href="{{ url_for('dashboard.dashboard') }}" class="btn btn-secondary">Назад</a>
+    </div>
+
+    {% if bookings %}
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            {% if role == 'student' %}
+                            <th>Репетитор</th>
+                            {% else %}
+                            <th>Студент</th>
+                            {% endif %}
+                            <th>Предмет</th>
+                            <th>Дата</th>
+                            <th>Время</th>
+                            <th>Продолжительность</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in bookings %}
+                        <tr>
+                            {% if role == 'student' %}
+                            <td data-label="Репетитор">{{ booking.tutor.user.full_name }}</td>
+                            {% else %}
+                            <td data-label="Студент">{{ booking.student.full_name }}</td>
+                            {% endif %}
+                            <td data-label="Предмет">{{ booking.subject }}</td>
+                            <td data-label="Дата">{{ booking.lesson_date }}</td>
+                            <td data-label="Время">{{ booking.lesson_time }}</td>
+                            <td data-label="Продолжительность">{{ booking.duration }} мин</td>
+                            <td data-label="Действия">
+                                <a href="{{ url_for('lesson.room', booking_id=booking.id) }}" class="btn btn-sm btn-outline-primary">
+                                    Просмотр
+                                </a>
+                                {% if role == 'student' and not booking.review %}
+                                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" 
+                                        data-bs-target="#reviewModal{{ booking.id }}">
+                                    Оставить отзыв
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                        <!-- Review Modal -->
+                        {% if role == 'student' and not booking.review %}
+                        <div class="modal fade" id="reviewModal{{ booking.id }}" tabindex="-1" aria-labelledby="reviewModalLabel{{ booking.id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="reviewModalLabel{{ booking.id }}">Оставить отзыв о уроке</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <form method="POST" action="{{ url_for('dashboard.add_review', booking_id=booking.id) }}">
+                                        <div class="modal-body">
+                                            <div class="mb-3">
+                                                <label class="form-label">Оцените урок</label>
+                                                <div class="d-flex gap-3 justify-content-center">
+                                                    {% for i in range(1, 6) %}
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="rating" 
+                                                               id="rating{{ booking.id }}_{{ i }}" value="{{ i }}" required>
+                                                        <label class="form-check-label" for="rating{{ booking.id }}_{{ i }}">
+                                                            {{ i }} ⭐
+                                                        </label>
+                                                    </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="comment{{ booking.id }}" class="form-label">Ваш отзыв (необязательно)</label>
+                                                <textarea class="form-control" id="comment{{ booking.id }}" name="comment" 
+                                                          rows="4" placeholder="Поделитесь своими впечатлениями о уроке..."></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                                            <button type="submit" class="btn btn-primary">Отправить отзыв</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        У вас пока нет завершенных уроков.
+    </div>
+    {% endif %}
+</div>
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Инициализация всех модальных окон Bootstrap
+    var modalEls = document.querySelectorAll('.modal');
+    modalEls.forEach(function(modalEl) {
+        new bootstrap.Modal(modalEl);
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,44 @@
+{% macro input(name, label, type='text', value='', required=false, placeholder='', class='') %}
+<div class="mb-3">
+    <label for="{{ name }}" class="form-label">{{ label }}</label>
+    <input type="{{ type }}" 
+           class="form-control {{ class }}"
+           id="{{ name }}" 
+           name="{{ name }}"
+           value="{{ value }}"
+           {% if required %}required{% endif %}
+           placeholder="{{ placeholder }}">
+</div>
+{% endmacro %}
+
+{% macro select(name, label, options, selected='', required=false) %}
+<div class="mb-3">
+    <label for="{{ name }}" class="form-label">{{ label }}</label>
+    <select class="form-select" id="{{ name }}" name="{{ name }}" {% if required %}required{% endif %}>
+        <option value="">Выберите...</option>
+        {% for value, text in options %}
+        <option value="{{ value }}" {% if value == selected %}selected{% endif %}>{{ text }}</option>
+        {% endfor %}
+    </select>
+</div>
+{% endmacro %}
+
+{% macro textarea(name, label, value='', rows=3, required=false, placeholder='') %}
+<div class="mb-3">
+    <label for="{{ name }}" class="form-label">{{ label }}</label>
+    <textarea class="form-control" 
+              id="{{ name }}" 
+              name="{{ name }}" 
+              rows="{{ rows }}"
+              {% if required %}required{% endif %}
+              placeholder="{{ placeholder }}">{{ value }}</textarea>
+</div>
+{% endmacro %}
+
+{% macro file_input(name, label, accept='', required=false) %}
+<div class="mb-3">
+    <label for="{{ name }}" class="form-label">{{ label }}</label>
+    <input type="file" class="form-control" id="{{ name }}" name="{{ name }}" 
+           accept="{{ accept }}" {% if required %}required{% endif %}>
+</div>
+{% endmacro %}

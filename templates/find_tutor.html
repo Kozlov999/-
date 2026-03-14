@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link href="{{ url_for('static', filename='css/find-tutor.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <div class="dashboard-section-title">Поиск репетитора</div>
+            <div class="dashboard-section-subtitle">Выберите специалиста и забронируйте удобное время</div>
+        </div>
+    </div>
+
+    <!-- Фильтры поиска -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('tutor.find') }}" class="row g-3">
+                <div class="col-md-3">
+                    <label for="search" class="form-label">Поиск</label>
+                    <input type="text" class="form-control" id="search" name="search" 
+                           placeholder="Имя, образование..." value="{{ current_filters.search or '' }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="subject" class="form-label">Предмет</label>
+                    <select class="form-select" id="subject" name="subject">
+                        <option value="">Все предметы</option>
+                        {% for subject in all_subjects %}
+                        <option value="{{ subject }}" {% if current_filters.subject == subject %}selected{% endif %}>
+                            {{ subject }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="min_rate" class="form-label">Мин. цена (₽/час)</label>
+                    <input type="number" class="form-control" id="min_rate" name="min_rate" 
+                           min="0" step="100" value="{{ current_filters.min_rate or '' }}">
+                </div>
+                <div class="col-md-2">
+                    <label for="max_rate" class="form-label">Макс. цена (₽/час)</label>
+                    <input type="number" class="form-control" id="max_rate" name="max_rate" 
+                           min="0" step="100" value="{{ current_filters.max_rate or '' }}">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">Применить</button>
+                </div>
+            </form>
+            {% if current_filters.subject or current_filters.min_rate or current_filters.max_rate or current_filters.search %}
+            <div class="mt-2">
+                <a href="{{ url_for('tutor.find') }}" class="btn btn-sm btn-outline-secondary">Сбросить фильтры</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row g-4">
+        {% for tutor in tutors %}
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="tutor-card-header mb-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="tutor-avatar">
+                                {{ tutor.user.initials }}
+                            </div>
+                            <div>
+                                <h5 class="card-title mb-0">{{ tutor.user.full_name }}</h5>
+                                <small class="text-muted">Онлайн‑репетитор</small>
+                                {% if tutor.get_average_rating() %}
+                                <br><small class="text-warning">⭐ {{ tutor.get_average_rating() }} ({{ tutor.get_reviews_count() }} отзывов)</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <div class="muted-label mb-1">Ставка за час</div>
+                            <div class="tutor-rate">{{ tutor.hourly_rate }} ₽/час</div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="muted-label mb-1">Предметы</div>
+                        {% for subject in tutor.subjects.split(',') %}
+                        <span class="tutor-subject-chip">{{ subject.strip() }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <p class="mb-1"><span class="muted-label">Образование</span><br>
+                        {% if tutor.education %}
+                            {{ tutor.education[:120] }}{% if tutor.education|length > 120 %}...{% endif %}
+                        {% else %}
+                            <span class="text-muted">Не указано</span>
+                        {% endif %}
+                    </p>
+                    
+                    <p class="mb-1"><span class="muted-label">Опыт</span><br>
+                        {% if tutor.experience %}
+                            {{ tutor.experience[:120] }}{% if tutor.experience|length > 120 %}...{% endif %}
+                        {% else %}
+                            <span class="text-muted">Не указан</span>
+                        {% endif %}
+                    </p>
+                    
+                    {% if tutor.about %}
+                    <p class="mb-0"><span class="muted-label">О репетиторе</span><br>
+                        {{ tutor.about[:160] }}{% if tutor.about|length > 160 %}...{% endif %}
+                    </p>
+                    {% endif %}
+                </div>
+                <div class="card-footer d-flex justify-content-between align-items-center">
+                    <small class="text-muted">Выберите дату и время урока</small>
+                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" 
+                            data-bs-target="#bookModal{{ tutor.id }}">
+                        Забронировать
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Modal -->
+        <div class="modal fade" id="bookModal{{ tutor.id }}" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Забронировать урок с {{ tutor.user.first_name }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form method="POST" action="{{ url_for('tutor.book', tutor_id=tutor.id) }}">
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="subject{{ tutor.id }}" class="form-label">Предмет</label>
+                                <select class="form-select" id="subject{{ tutor.id }}" name="subject" required>
+                                    <option value="">Выберите предмет</option>
+                                    {% for subject in tutor.subjects.split(',') %}
+                                    <option value="{{ subject.strip() }}">{{ subject.strip() }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="lesson_date{{ tutor.id }}" class="form-label">Дата урока</label>
+                                <input type="date" class="form-control" id="lesson_date{{ tutor.id }}" 
+                                       name="lesson_date" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="lesson_time{{ tutor.id }}" class="form-label">Время урока</label>
+                                <input type="time" class="form-control" id="lesson_time{{ tutor.id }}" 
+                                       name="lesson_time" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="duration{{ tutor.id }}" class="form-label">Продолжительность (минуты)</label>
+                                <select class="form-select" id="duration{{ tutor.id }}" name="duration" required>
+                                    <option value="60">60 минут</option>
+                                    <option value="90">90 минут</option>
+                                    <option value="120">120 минут</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                            <button type="submit" class="btn btn-primary">Забронировать</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Пока нет доступных репетиторов. Попробуйте зайти позже.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

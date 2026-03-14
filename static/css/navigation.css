@@ -1,0 +1,39 @@
+/* Стили навигации */
+.navbar {
+    background: var(--gradient-accent);
+    box-shadow: var(--shadow-medium);
+}
+
+.navbar-brand {
+    color: white !important;
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+.navbar-toggler {
+    border: 2px solid white;
+    padding: 8px 12px;
+}
+
+.navbar-toggler-icon {
+    filter: brightness(0) invert(1);
+}
+
+/* Мобильная навигация */
+@media (max-width: 768px) {
+    .navbar-collapse {
+        background: var(--gradient-accent);
+        padding: 20px;
+        margin-top: 10px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    
+    .nav-item {
+        margin: 8px 0;
+    }
+    
+    .navbar-brand {
+        font-size: 1.3rem;
+    }
+}

@@ -1,0 +1,90 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Пользователи - Админ панель{% endblock %}
+
+{% block content %}
+<div class="navbar-top d-flex justify-content-between align-items-center">
+    <h4 class="mb-0"><i class="fas fa-users me-2"></i>Управление пользователями</h4>
+    <div>
+        <span class="badge bg-primary">Всего: {{ users|length }}</span>
+    </div>
+</div>
+
+<!-- Фильтры -->
+<div class="filter-bar">
+    <form method="GET" class="row g-3">
+        <div class="col-md-3">
+            <select name="role" class="form-select">
+                <option value="all" {% if current_role == 'all' %}selected{% endif %}>Все роли</option>
+                <option value="student" {% if current_role == 'student' %}selected{% endif %}>Студенты</option>
+                <option value="tutor" {% if current_role == 'tutor' %}selected{% endif %}>Репетиторы</option>
+                <option value="admin" {% if current_role == 'admin' %}selected{% endif %}>Администраторы</option>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <input type="text" name="search" class="form-control" 
+                   placeholder="Поиск по имени, email..." 
+                   value="{{ search or '' }}">
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="fas fa-search me-2"></i>Применить
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Список пользователей -->
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>ФИО</th>
+                        <th>Email</th>
+                        <th>Телефон</th>
+                        <th>Роль</th>
+                        <th>Дата регистрации</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.full_name }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.phone or '-' }}</td>
+                        <td>
+                            {% if user.role == 'admin' %}
+                                <span class="badge bg-danger">Админ</span>
+                            {% elif user.role == 'tutor' %}
+                                <span class="badge bg-success">Репетитор</span>
+                            {% else %}
+                                <span class="badge bg-info">Студент</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ user.created_at.strftime('%d.%m.%Y') }}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-danger" 
+                                    onclick="alert('Функция в разработке')">
+                                <i class="fas fa-ban"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4">
+                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                            <p class="text-muted mb-0">Пользователи не найдены</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

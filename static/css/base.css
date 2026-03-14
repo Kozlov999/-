@@ -1,0 +1,22 @@
+/* Базовые стили для всех страниц */
+:root {
+    --primary-light: #f5f9ff;
+    --primary-main: #1976D2;
+    --primary-dark: #0D47A1;
+    --gradient-primary: linear-gradient(135deg, #f5f9ff 0%, #d3d3d3 100%);
+    --gradient-accent: linear-gradient(135deg, #1976D2 0%, #0D47A1 100%);
+    --shadow-soft: 0 4px 20px rgba(25, 118, 210, 0.1);
+    --shadow-medium: 0 8px 30px rgba(25, 118, 210, 0.15);
+}
+
+body {
+    background: linear-gradient(135deg, #f5f9ff 0%, #d3d3d3 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+.page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}

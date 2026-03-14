@@ -1,0 +1,26 @@
+# Зависимости с исправленными версиями для Python 3.13
+flask==2.3.3
+flask-sqlalchemy==3.1.1
+flask-login==0.6.2
+flask-socketio==5.3.6
+flask-cors==4.0.1
+flask-mail==0.9.1
+flask-wtf==1.1.1
+sqlalchemy==2.0.23
+alembic==1.12.1
+python-socketio==5.10.0
+eventlet==0.33.3
+werkzeug==2.3.7
+email-validator==2.1.0
+bcrypt==4.0.1
+pillow==10.0.0  # Более старая версия
+python-dateutil==2.8.2
+python-dotenv==1.0.0
+psycopg2-binary==2.9.9
+pymysql==1.1.0
+pyodbc==5.0.1
+pytest==7.4.3
+pytest-cov==4.1.0
+gunicorn==21.2.0
+redis==5.0.1
+celery==5.3.4

@@ -1,0 +1,76 @@
+{% macro status_badge(status) %}
+<span class="status-badge status-badge-{{ status }}">
+    {{ status }}
+</span>
+{% endmacro %}
+
+{% macro booking_actions(booking, role) %}
+    {% if role == 'tutor' and booking.status == 'pending' %}
+        <form method="POST" action="{{ url_for('tutor.update_booking_status', booking_id=booking.id) }}" class="d-inline">
+            <input type="hidden" name="status" value="confirmed">
+            <button type="submit" class="btn btn-success btn-sm">Подтвердить</button>
+        </form>
+        <form method="POST" action="{{ url_for('tutor.update_booking_status', booking_id=booking.id) }}" class="d-inline">
+            <input type="hidden" name="status" value="cancelled">
+            <button type="submit" class="btn btn-danger btn-sm">Отклонить</button>
+        </form>
+    {% elif booking.status == 'confirmed' %}
+        <a href="{{ url_for('lesson.room', booking_id=booking.id) }}" class="btn btn-primary btn-sm">
+            {% if role == 'tutor' %}Начать{% else %}Присоединиться{% endif %}
+        </a>
+        {% if role == 'student' and (not booking.payment or booking.payment.status != 'completed') %}
+        <a href="{{ url_for('payment.process', booking_id=booking.id) }}" class="btn btn-success btn-sm">
+            Оплатить
+        </a>
+        {% endif %}
+    {% endif %}
+    {% if role == 'student' and booking.status in ['pending', 'confirmed'] %}
+    <form method="POST" action="{{ url_for('lesson.cancel', booking_id=booking.id) }}" 
+          class="d-inline" data-confirm="Вы уверены, что хотите отменить этот урок?">
+        <button type="submit" class="btn btn-danger btn-sm">Отменить</button>
+    </form>
+    {% endif %}
+{% endmacro %}
+
+{% macro booking_table(bookings, role, show_actions=true) %}
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                {% if role == 'student' %}
+                <th>Репетитор</th>
+                {% else %}
+                <th>Студент</th>
+                {% endif %}
+                <th>Предмет</th>
+                <th>Дата</th>
+                <th>Время</th>
+                <th>Статус</th>
+                {% if show_actions %}
+                <th>Действия</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in bookings %}
+            <tr>
+                {% if role == 'student' %}
+                <td data-label="Репетитор">{{ booking.tutor.user.full_name }}</td>
+                {% else %}
+                <td data-label="Студент">{{ booking.student.full_name }}</td>
+                {% endif %}
+                <td data-label="Предмет">{{ booking.subject }}</td>
+                <td data-label="Дата">{{ booking.lesson_date }}</td>
+                <td data-label="Время">{{ booking.lesson_time }}</td>
+                <td data-label="Статус">{{ status_badge(booking.status) }}</td>
+                {% if show_actions %}
+                <td data-label="Действия">
+                    {{ booking_actions(booking, role) }}
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endmacro %}

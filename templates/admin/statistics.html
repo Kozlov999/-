@@ -1,0 +1,169 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Статистика - Админ панель{% endblock %}
+
+{% block content %}
+<div class="navbar-top d-flex justify-content-between align-items-center">
+    <h4 class="mb-0"><i class="fas fa-chart-line me-2"></i>Статистика</h4>
+    <div>
+        <span class="badge bg-primary">За 30 дней</span>
+    </div>
+</div>
+
+{% if not has_data %}
+<div class="alert alert-info">
+    <i class="fas fa-info-circle me-2"></i>
+    Пока нет данных для отображения статистики. Появятся после первых регистраций и уроков.
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Новые пользователи</h5>
+            </div>
+            <div class="card-body">
+                {% if daily_users %}
+                <canvas id="usersChart" style="height: 300px; width: 100%;"></canvas>
+                {% else %}
+                <p class="text-muted text-center py-4">Нет данных о новых пользователях</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Новые бронирования</h5>
+            </div>
+            <div class="card-body">
+                {% if daily_bookings %}
+                <canvas id="bookingsChart" style="height: 300px; width: 100%;"></canvas>
+                {% else %}
+                <p class="text-muted text-center py-4">Нет данных о бронированиях</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Топ репетиторов</h5>
+    </div>
+    <div class="card-body">
+        {% if top_tutors %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Репетитор</th>
+                        <th>Количество уроков</th>
+                        <th>Средний рейтинг</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tutor in top_tutors %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ tutor.name }}</td>
+                        <td>
+                            <span class="badge bg-primary">{{ tutor.bookings }}</span>
+                        </td>
+                        <td>
+                            {% if tutor.rating > 0 %}
+                                {% for i in range(tutor.rating|int) %}
+                                    <i class="fas fa-star text-warning"></i>
+                                {% endfor %}
+                                {% if tutor.rating % 1 >= 0.5 %}
+                                    <i class="fas fa-star-half-alt text-warning"></i>
+                                {% endif %}
+                                <small class="text-muted ms-2">({{ tutor.rating }})</small>
+                            {% else %}
+                                <span class="text-muted">Нет оценок</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center py-4">
+                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                            <p class="text-muted mb-0">Нет данных о репетиторах</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted text-center py-4">Нет данных о репетиторах</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    {% if daily_users %}
+    // График пользователей
+    const usersCtx = document.getElementById('usersChart').getContext('2d');
+    new Chart(usersCtx, {
+        type: 'line',
+        data: {
+            labels: [{% for item in daily_users %}'{{ item.date }}',{% endfor %}],
+            datasets: [{
+                label: 'Новые пользователи',
+                data: [{% for item in daily_users %}{{ item.count }},{% endfor %}],
+                borderColor: '#1976D2',
+                backgroundColor: 'rgba(25, 118, 210, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+    {% endif %}
+
+    {% if daily_bookings %}
+    // График бронирований
+    const bookingsCtx = document.getElementById('bookingsChart').getContext('2d');
+    new Chart(bookingsCtx, {
+        type: 'line',
+        data: {
+            labels: [{% for item in daily_bookings %}'{{ item.date }}',{% endfor %}],
+            datasets: [{
+                label: 'Новые бронирования',
+                data: [{% for item in daily_bookings %}{{ item.count }},{% endfor %}],
+                borderColor: '#4CAF50',
+                backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+    {% endif %}
+});
+</script>
+{% endblock %}

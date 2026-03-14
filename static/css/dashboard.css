@@ -1,0 +1,63 @@
+/* Стили для личного кабинета */
+.dashboard-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 24px;
+}
+
+@media (max-width: 768px) {
+    .dashboard-layout {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}
+
+.avatar-circle {
+    width: 80px;
+    height: 80px;
+    background: var(--gradient-accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 32px;
+    font-weight: bold;
+    margin: 0 auto 15px;
+}
+
+.role-pill {
+    display: inline-block;
+    padding: 5px 15px;
+    background: var(--gradient-primary);
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.status-badge-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-badge-confirmed {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-badge-completed {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.status-badge-cancelled {
+    background: #f8d7da;
+    color: #721c24;
+}

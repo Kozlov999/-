@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-shell">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">Оплата урока</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h5>Детали урока</h5>
+                        <p><strong>Репетитор:</strong> {{ booking.tutor.user.full_name }}</p>
+                        <p><strong>Предмет:</strong> {{ booking.subject }}</p>
+                        <p><strong>Дата:</strong> {{ booking.lesson_date }}</p>
+                        <p><strong>Время:</strong> {{ booking.lesson_time }}</p>
+                        <p><strong>Продолжительность:</strong> {{ booking.duration }} минут</p>
+                        <p><strong>Ставка:</strong> {{ booking.tutor.hourly_rate }} ₽/час</p>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <h5>К оплате: <strong>{{ "%.2f"|format(amount) }} ₽</strong></h5>
+                        <small>Расчет: {{ booking.tutor.hourly_rate }} ₽/час × {{ "%.1f"|format(booking.duration / 60) }} часа = {{ "%.2f"|format(amount) }} ₽</small>
+                    </div>
+
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">Способ оплаты</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="payment_method" 
+                                       id="demo" value="demo" checked>
+                                <label class="form-check-label" for="demo">
+                                    Демо-оплата (для тестирования)
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-warning">
+                            <small>⚠️ Это демонстрационная версия. В реальном приложении здесь была бы интеграция с платежной системой.</small>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">Оплатить</button>
+                            <a href="{{ url_for('dashboard.dashboard') }}" class="btn btn-secondary">Отмена</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,9 @@
+/* optimized.css - объедините все ваши CSS файлы */
+@import 'base.css';
+@import 'components.css';
+@import 'navigation.css';
+@import 'dashboard.css';
+@import 'find-tutor.css';
+@import 'lesson-room.css';
+@import 'responsive.css';
+@import 'mobile.css';

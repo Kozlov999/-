@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">Профиль репетитора</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="subjects" class="form-label">Предметы (через запятую)</label>
+                        <input type="text" class="form-control" id="subjects" name="subjects" 
+                               placeholder="Например: Математика, Физика, Программирование" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="education" class="form-label">Образование</label>
+                        <textarea class="form-control" id="education" name="education" rows="3" 
+                                  placeholder="Ваше образование, университет, специальность..."></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="experience" class="form-label">Опыт работы</label>
+                        <textarea class="form-control" id="experience" name="experience" rows="3" 
+                                  placeholder="Опишите ваш опыт преподавания..."></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="hourly_rate" class="form-label">Ставка за час (руб.)</label>
+                        <input type="number" class="form-control" id="hourly_rate" name="hourly_rate" 
+                               min="0" step="100" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="about" class="form-label">О себе</label>
+                        <textarea class="form-control" id="about" name="about" rows="4" 
+                                  placeholder="Расскажите о себе, вашем подходе к преподаванию..."></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Сохранить профиль</button>
+                    <a href="{{ url_for('dashboard.dashboard') }}" class="btn btn-secondary">Отмена</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

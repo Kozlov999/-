@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+    <div class="dashboard-layout">
+        <aside>
+            <div class="card profile-card mb-4">
+                <div class="card-body text-center">
+                    <div class="avatar-circle">
+                        {{ current_user.initials }}
+                    </div>
+                    <h5 class="card-title mb-1">{{ current_user.full_name }}</h5>
+                    <p class="text-muted mb-2">{{ current_user.email }}</p>
+                    <span class="role-pill mb-3">
+                        {% if current_user.role == 'tutor' %}
+                        👨‍🏫 Репетитор
+                        {% else %}
+                        👨‍🎓 Студент
+                        {% endif %}
+                    </span>
+                    
+                    {% if current_user.role == 'tutor' and not tutor %}
+                    <div class="mt-2">
+                        <a href="{{ url_for('tutor.register') }}" class="btn btn-primary btn-sm">
+                            Заполнить профиль репетитора
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if upcoming_lessons %}
+            <div class="card">
+                <div class="card-header">
+                    <div class="dashboard-section-title">Ближайшие уроки</div>
+                    <div class="dashboard-section-subtitle">Следующие 7 дней</div>
+                </div>
+                <div class="card-body">
+                    {% for lesson in upcoming_lessons %}
+                    <div class="upcoming-lesson mb-2 p-2">
+                        <small class="text-muted">{{ lesson.lesson_date }} в {{ lesson.lesson_time }}</small>
+                        <br>
+                        <strong>
+                            {% if current_user.role == 'tutor' %}
+                            {{ lesson.student.first_name }}
+                            {% else %}
+                            {{ lesson.tutor.user.first_name }}
+                            {% endif %}
+                        </strong>
+                        <br>
+                        <small>{{ lesson.subject }}</small>
+                        <br>
+                        <a href="{{ url_for('lesson.room', booking_id=lesson.id) }}" class="btn btn-sm btn-primary mt-1">
+                            Перейти к уроку
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </aside>
+        
+        <section>
+            {% if current_user.role == 'tutor' %}
+                <!-- Dashboard for Tutors -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Мой профиль репетитора</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if tutor %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Предметы:</strong> {{ tutor.subjects }}</p>
+                                <p><strong>Ставка:</strong> {{ tutor.hourly_rate }} руб./час</p>
+                                <p><strong>Статус:</strong> 
+                                    <span class="status-badge {% if tutor.is_verified %}status-badge-confirmed{% else %}status-badge-pending{% endif %}">
+                                        {{ 'Верифицирован' if tutor.is_verified else 'На проверке' }}
+                                    </span>
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Образование:</strong> {{ tutor.education or 'Не указано' }}</p>
+                                <p><strong>Опыт:</strong> {{ tutor.experience or 'Не указан' }}</p>
+                            </div>
+                        </div>
+                        {% else %}
+                        <p>Заполните профиль репетитора, чтобы начать принимать заказы.</p>
+                        <a href="{{ url_for('tutor.register') }}" class="btn btn-primary">Заполнить профиль</a>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% if tutor %}
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Бронирования</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if bookings %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Студент</th>
+                                        <th>Предмет</th>
+                                        <th>Дата</th>
+                                        <th>Время</th>
+                                        <th>Статус</th>
+                                        <th>Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for booking in bookings %}
+                                    <tr>
+                                        <td data-label="Студент">{{ booking.student.full_name }}</td>
+                                        <td data-label="Предмет">{{ booking.subject }}</td>
+                                        <td data-label="Дата">{{ booking.lesson_date }}</td>
+                                        <td data-label="Время">{{ booking.lesson_time }}</td>
+                                        <td data-label="Статус">
+                                            <span class="status-badge status-badge-{{ booking.status }}">
+                                                {{ booking.status }}
+                                            </span>
+                                        </td>
+                                        <td data-label="Действия">
+                                            {% if booking.status == 'pending' %}
+                                            <form method="POST" action="{{ url_for('tutor.update_booking_status', booking_id=booking.id) }}" class="d-inline">
+                                                <input type="hidden" name="status" value="confirmed">
+                                                <button type="submit" class="btn btn-success btn-sm">Подтвердить</button>
+                                            </form>
+                                            <form method="POST" action="{{ url_for('tutor.update_booking_status', booking_id=booking.id) }}" class="d-inline">
+                                                <input type="hidden" name="status" value="cancelled">
+                                                <button type="submit" class="btn btn-danger btn-sm">Отклонить</button>
+                                            </form>
+                                            {% elif booking.status == 'confirmed' %}
+                                            <a href="{{ url_for('lesson.room', booking_id=booking.id) }}" class="btn btn-primary btn-sm">
+                                                Начать урок
+                                            </a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <p>У вас пока нет бронирований.</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                
+            {% else %}
+                <!-- Dashboard for Students -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Мои уроки</h5>
+                        <div class="d-flex gap-2">
+                            <a href="{{ url_for('dashboard.history') }}" class="btn btn-outline-secondary btn-sm">История</a>
+                            <a href="{{ url_for('tutor.find') }}" class="btn btn-primary btn-sm">Найти репетитора</a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% if bookings %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Репетитор</th>
+                                        <th>Предмет</th>
+                                        <th>Дата</th>
+                                        <th>Время</th>
+                                        <th>Статус</th>
+                                        <th>Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for booking in bookings %}
+                                    <tr>
+                                        <td data-label="Репетитор">
+                                            {{ booking.tutor.user.full_name }}
+                                            {% if booking.tutor.get_average_rating() %}
+                                            <br><small class="text-muted">⭐ {{ booking.tutor.get_average_rating() }} ({{ booking.tutor.get_reviews_count() }} отзывов)</small>
+                                            {% endif %}
+                                        </td>
+                                        <td data-label="Предмет">{{ booking.subject }}</td>
+                                        <td data-label="Дата">{{ booking.lesson_date }}</td>
+                                        <td data-label="Время">{{ booking.lesson_time }}</td>
+                                        <td data-label="Статус">
+                                            <span class="status-badge status-badge-{{ booking.status }}">
+                                                {{ booking.status }}
+                                            </span>
+                                        </td>
+                                        <td data-label="Действия">
+                                            {% if booking.status == 'confirmed' %}
+                                            <a href="{{ url_for('lesson.room', booking_id=booking.id) }}" class="btn btn-primary btn-sm">
+                                                Присоединиться
+                                            </a>
+                                            {% if not booking.payment or booking.payment.status != 'completed' %}
+                                            <a href="{{ url_for('payment.process', booking_id=booking.id) }}" class="btn btn-success btn-sm">
+                                                Оплатить
+                                            </a>
+                                            {% endif %}
+                                            {% endif %}
+                                            {% if booking.status in ['pending', 'confirmed'] %}
+                                            <form method="POST" action="{{ url_for('lesson.cancel', booking_id=booking.id) }}" 
+                                                  class="d-inline" data-confirm="Вы уверены, что хотите отменить этот урок?">
+                                                <button type="submit" class="btn btn-danger btn-sm">Отменить</button>
+                                            </form>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <p>У вас пока нет забронированных уроков.</p>
+                        <a href="{{ url_for('tutor.find') }}" class="btn btn-primary">Найти репетитора</a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </section>
+    </div>
+</div>
+{% endblock %}
