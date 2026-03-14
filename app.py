@@ -1,5 +1,5 @@
 """
-Главный файл приложения TutorPlatform с поддержкой нескольких портов
+Главный файл приложения Место репетитора с поддержкой нескольких портов
 """
 
 from flask import Flask, render_template, request, jsonify
